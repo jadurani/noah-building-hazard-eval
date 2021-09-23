@@ -100,36 +100,45 @@ def groupToEvalObj(buildingName, hazardValues):
     evalObj[hazardName][hazardValue].append(buildingName)
 
 def printEvalObjToList():
+  outputFile = open("output.txt", 'w')
+
   for hazardName in evalObj:
-    print('- ' + hazardNames[hazardName] + ':')
+    outputFile.write('- ' + hazardNames[hazardName] + ':')
+    outputFile.write('\n')
     for hazardLevel in evalObj[hazardName]:
       buildingCount = len(evalObj[hazardName][hazardLevel])
-      print('  - ' + hazardLevelName[hazardLevel] + ' (' +  str(buildingCount) + '):')
+      outputFile.write('  - ' + hazardLevelName[hazardLevel] + ' (' +  str(buildingCount) + '):')
+      outputFile.write('\n')
       if buildingCount == 0:
-        print('    - (None)')
+        outputFile.write('    - (None)')
+        outputFile.write('\n')
       for buildingName in evalObj[hazardName][hazardLevel]:
-        print('    - ' + buildingName)
+        outputFile.write('    - ' + buildingName)
+        outputFile.write('\n')
+
+  outputFile.close()
 
 
 def processData(data):
   print('Evaluating ' + str(len(data)) + ' buildings in Quezon City...')
+  for index, feature in enumerate(data['features']):
+    buildingName = feature['properties']['name']
 
-  for i in data['features']:
-    buildingName = i['properties']['name']
-    print(buildingName)
+    if index % 1000 == 0:
+      print(index,buildingName)
 
     # 1. Find centroid
-    coordsList = i['geometry']['coordinates'][0][0]
+    coordsList = feature['geometry']['coordinates'][0][0]
     centroid = findCentroid(coordsList)
-    print('centroid', centroid)
+    # print('centroid', centroid)
 
     # 2. Find the longest segment
     radius = findLongestSegment(coordsList, centroid)
-    print(radius)
+    # print(radius)
 
     # 3. Evaluate hazard susceptibility
     hazardValues = evaluateBuilding(centroid, radius)
-    print(hazardValues)
+    # print(hazardValues)
 
     # 4. Group the list accoding to type and level
     groupToEvalObj(buildingName, hazardValues)
