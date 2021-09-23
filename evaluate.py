@@ -1,9 +1,8 @@
 #!/usr/bin/python
 
 import json
-import math
+from math import radians, cos, sin, asin, sqrt
 import requests
-import sys
 
 
 def findCentroid(coordsList):
@@ -11,14 +10,33 @@ def findCentroid(coordsList):
   aveLat = sum([y[1] for y in coordsList]) / len(coordsList)
   return [aveLng, aveLat]
 
-def computeDistanceBetweenPoints(x1, x2, y1, y2):
-  x = (x2 - x1)**2
-  y = (y2 - y1)**2
-  return math.sqrt(x + y)
+def computeDistanceBetweenPoints(lat1, lat2, lon1, lon2):
+    # The math module contains a function named
+    # radians which converts from degrees to radians.
+    lon1 = radians(lon1)
+    lon2 = radians(lon2)
+    lat1 = radians(lat1)
+    lat2 = radians(lat2)
+
+    # Haversine formula
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+
+    c = 2 * asin(sqrt(a))
+
+    # Radius of earth in kilometers. Use 3956 for miles
+    r = 6371
+
+    # calculate the result
+    resultInKM = (c * r)
+    resultInMeters = resultInKM * 1000
+    return resultInMeters
+
 
 def findLongestSegment(coordsList, centroid):
   distances = [computeDistanceBetweenPoints(coordsPair[0], centroid[0], coordsPair[1], centroid[1]) for coordsPair in coordsList]
-  return max(distances) * 100000
+  return max(distances)
 
 def evaluateBuilding(centroid, radius):
   URL = "https://api.mapbox.com/v4/upri-noah.ph_fh_100yr_tls,upri-noah.ph_ssh_ssa4_tls,upri-noah.ph_lh_lh1_tls,upri-noah.ph_lh_lh2_tls,upri-noah.ph_lh_lh3_tls/tilequery/" + str(centroid[0]) + "," + str(centroid[1]) + ".json?radius=" + str(radius) + "&limit=20&access_token=pk.eyJ1IjoiamFkdXJhbmkiLCJhIjoiY2tsZ245OGx3MHltbTJwcWwxbGpubjY1cyJ9.lqNLH1nne4ddBcXvWsP9YQ"
@@ -98,6 +116,7 @@ def processData(data):
 
   for i in data['features']:
     buildingName = i['properties']['name']
+    print(buildingName)
 
     # 1. Find centroid
     coordsList = i['geometry']['coordinates'][0][0]
