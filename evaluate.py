@@ -4,15 +4,11 @@ import json
 import math
 import requests
 
-blueprintsFile = open('sample-file.json',)
-data = json.load(blueprintsFile)
 
 def findCentroid(coordsList):
   aveLng = sum([x[0] for x in coordsList]) / len(coordsList)
   aveLat = sum([y[1] for y in coordsList]) / len(coordsList)
   return [aveLng, aveLat]
-
-
 
 def computeDistanceBetweenPoints(x1, x2, y1, y2):
   x = (x2 - x1)**2
@@ -46,21 +42,23 @@ def evaluateBuilding(centroid, radius):
   return hazardValues
 
 
+def processData():
+  for i in data['features']:
+    print(i['properties']['name'])
+    # 1. Find centroid
+    coordsList = i['geometry']['coordinates'][0][0]
+    centroid = findCentroid(coordsList)
+    print('centroid', centroid)
+    # 2. Find the longest segment
+    radius = findLongestSegment(coordsList, centroid)
+    print(radius)
+    # 3. Evaluate hazard susceptibility
+    hazardValues = evaluateBuilding(centroid, radius)
+    print(hazardValues)
 
-for i in data['features']:
-  print(i['properties']['name'])
-  # 1. Find centroid
-  coordsList = i['geometry']['coordinates'][0][0]
-  centroid = findCentroid(coordsList)
-  print('centroid', centroid)
-  # 2. Find the longest segment
-  radius = findLongestSegment(coordsList, centroid)
-  print(radius)
-  # 3. Evaluate hazard susceptibility
-  hazardValues = evaluateBuilding(centroid, radius)
-  print(hazardValues)
+    # 4. Group the list accoding to type and level
 
-  # 4. Group the list accoding to type and level
-
-
-f.close()
+blueprintsFile = open('sample-file.json',)
+data = json.load(blueprintsFile)
+processData(data)
+blueprintsFile.close()
