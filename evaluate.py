@@ -42,21 +42,53 @@ def evaluateBuilding(centroid, radius):
   return hazardValues
 
 
-def processData():
+evalList = {
+  'flood': {
+    0: [],
+    1: [],
+    2: [],
+    3: [],
+  },
+  'landslide': {
+    0: [],
+    1: [],
+    2: [],
+    3: [],
+  },
+  'stormSurge': {
+    0: [],
+    1: [],
+    2: [],
+    3: [],
+  }
+}
+
+def groupToEvalList(buildingName, hazardValues):
+  for hazardName in hazardValues:
+    hazardValue = hazardValues[hazardName]
+    evalList[hazardName][hazardValue].append(buildingName)
+
+
+def processData(data):
   for i in data['features']:
-    print(i['properties']['name'])
+    buildingName = i['properties']['name']
+
     # 1. Find centroid
     coordsList = i['geometry']['coordinates'][0][0]
     centroid = findCentroid(coordsList)
     print('centroid', centroid)
+
     # 2. Find the longest segment
     radius = findLongestSegment(coordsList, centroid)
     print(radius)
+
     # 3. Evaluate hazard susceptibility
     hazardValues = evaluateBuilding(centroid, radius)
     print(hazardValues)
 
     # 4. Group the list accoding to type and level
+    groupToEvalList(buildingName, hazardValues)
+  print(json.dumps(evalList, indent=2))
 
 blueprintsFile = open('sample-file.json',)
 data = json.load(blueprintsFile)
