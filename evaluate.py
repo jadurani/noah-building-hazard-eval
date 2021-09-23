@@ -32,7 +32,6 @@ def evaluateBuilding(centroid, radius):
 
   for f in features:
     properties = f['properties']
-    print(properties)
     if 'Var' in properties and hazardValues['flood'] < properties['Var']:
       hazardValues['flood'] = properties['Var']
     if 'HAZ' in properties and hazardValues['stormSurge'] < properties['HAZ']:
@@ -64,13 +63,39 @@ evalObj = {
   }
 }
 
+hazardNames = {
+  'flood': 'Flood',
+  'landslide': 'Landslide',
+  'stormSurge': 'Storm Surge',
+}
+
+hazardLevelName = {
+  0: 'Little to none',
+  1: 'Low',
+  2: 'Medium',
+  3: 'High'
+}
+
 def groupToEvalObj(buildingName, hazardValues):
   for hazardName in hazardValues:
     hazardValue = hazardValues[hazardName]
     evalObj[hazardName][hazardValue].append(buildingName)
 
+def printEvalObjToList():
+  for hazardName in evalObj:
+    print('- ' + hazardNames[hazardName] + ':')
+    for hazardLevel in evalObj[hazardName]:
+      buildingCount = len(evalObj[hazardName][hazardLevel])
+      print('  - ' + hazardLevelName[hazardLevel] + ' (' +  str(buildingCount) + '):')
+      if buildingCount == 0:
+        print('    - (None)')
+      for buildingName in evalObj[hazardName][hazardLevel]:
+        print('    - ' + buildingName)
+
 
 def processData(data):
+  print('Evaluating ' + str(len(data)) + ' buildings in Quezon City...')
+
   for i in data['features']:
     buildingName = i['properties']['name']
 
@@ -89,7 +114,9 @@ def processData(data):
 
     # 4. Group the list accoding to type and level
     groupToEvalObj(buildingName, hazardValues)
-  print(json.dumps(evalObj, indent=2))
+
+  printEvalObjToList()
+
 
 blueprintsFile = open('sample-file.json',)
 data = json.load(blueprintsFile)
