@@ -120,7 +120,7 @@ def printEvalObjToList():
 
 
 def processData(data):
-  print('Evaluating ' + str(len(data)) + ' buildings in Quezon City...')
+  print('Evaluating ' + str(len(data['features'])) + ' buildings in Quezon City...')
   for index, feature in enumerate(data['features']):
     buildingName = feature['properties']['name']
 
@@ -146,7 +146,7 @@ def processData(data):
   printEvalObjToList()
 
 
-blueprintsFile = open('sample-file.json',)
+blueprintsFile = open('QC_BldgFootprints.geojson',)
 data = json.load(blueprintsFile)
 processData(data)
 blueprintsFile.close()
