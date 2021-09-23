@@ -3,6 +3,7 @@
 import json
 import math
 import requests
+import sys
 
 
 def findCentroid(coordsList):
@@ -42,7 +43,7 @@ def evaluateBuilding(centroid, radius):
   return hazardValues
 
 
-evalList = {
+evalObj = {
   'flood': {
     0: [],
     1: [],
@@ -63,10 +64,10 @@ evalList = {
   }
 }
 
-def groupToEvalList(buildingName, hazardValues):
+def groupToEvalObj(buildingName, hazardValues):
   for hazardName in hazardValues:
     hazardValue = hazardValues[hazardName]
-    evalList[hazardName][hazardValue].append(buildingName)
+    evalObj[hazardName][hazardValue].append(buildingName)
 
 
 def processData(data):
@@ -87,8 +88,8 @@ def processData(data):
     print(hazardValues)
 
     # 4. Group the list accoding to type and level
-    groupToEvalList(buildingName, hazardValues)
-  print(json.dumps(evalList, indent=2))
+    groupToEvalObj(buildingName, hazardValues)
+  print(json.dumps(evalObj, indent=2))
 
 blueprintsFile = open('sample-file.json',)
 data = json.load(blueprintsFile)
